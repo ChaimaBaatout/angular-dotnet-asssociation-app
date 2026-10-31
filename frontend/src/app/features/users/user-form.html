@@ -1,0 +1,75 @@
+<a matButton class="back-link" routerLink="/admin/users">
+  <mat-icon>arrow_back</mat-icon>
+  Users
+</a>
+
+<header class="page-header">
+  <h1>{{ id() ? (canWrite() ? 'Edit user' : 'User details') : 'New user' }}</h1>
+</header>
+
+@if (error(); as message) {
+  <p class="form-error" role="alert">{{ message }}</p>
+}
+
+@if (!loadFailed()) {
+  <section class="panel">
+    <form [formGroup]="form" (ngSubmit)="save()" novalidate>
+      <div class="form-grid">
+        <mat-form-field>
+          <mat-label>First name</mat-label>
+          <input matInput formControlName="firstName" autocomplete="off" />
+          <mat-error>{{ form.controls.firstName.getError('server') ?? 'Enter a first name.' }}</mat-error>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Last name</mat-label>
+          <input matInput formControlName="lastName" autocomplete="off" />
+          <mat-error>{{ form.controls.lastName.getError('server') ?? 'Enter a last name.' }}</mat-error>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Email</mat-label>
+          <input matInput type="email" formControlName="email" autocomplete="off" />
+          <mat-error>{{ form.controls.email.getError('server') ?? 'Enter a valid email address.' }}</mat-error>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Phone number (optional)</mat-label>
+          <input matInput type="tel" formControlName="phoneNumber" autocomplete="off" />
+          <mat-error>{{ form.controls.phoneNumber.getError('server') ?? 'Enter a valid phone number.' }}</mat-error>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Profile</mat-label>
+          <mat-select formControlName="profileId">
+            @for (profile of profiles(); track profile.id) {
+              <mat-option [value]="profile.id">{{ profile.name }}</mat-option>
+            }
+          </mat-select>
+          @if (isSelf()) {
+            <mat-hint>You cannot change your own profile.</mat-hint>
+          }
+          <mat-error>{{ form.controls.profileId.getError('server') ?? 'Choose a profile.' }}</mat-error>
+        </mat-form-field>
+      </div>
+
+      <p>
+        <mat-slide-toggle formControlName="isActive">Account is active</mat-slide-toggle>
+      </p>
+      @if (isSelf()) {
+        <p class="muted">You cannot deactivate your own account.</p>
+      }
+      @if (user(); as current) {
+        <p class="muted">
+          Created {{ current.createdAt | date: 'medium' }} ·
+          Last sign-in {{ current.lastLoginAt ? (current.lastLoginAt | date: 'medium') : 'never' }}
+        </p>
+      } @else {
+        <p class="muted">A temporary password is generated when you create the user. It is shown once.</p>
+      }
+
+      @if (canWrite()) {
+        <div class="form-actions">
+          <button matButton="filled" type="submit" [disabled]="busy()">{{ id() ? 'Save' : 'Create user' }}</button>
+          <a matButton routerLink="/admin/users">Cancel</a>
+        </div>
+      }
+    </form>
+  </section>
+}

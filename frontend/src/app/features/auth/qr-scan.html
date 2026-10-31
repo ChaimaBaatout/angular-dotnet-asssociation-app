@@ -1,0 +1,32 @@
+<div class="auth-page">
+  <main class="auth-card">
+    <h1>Sign in with a QR code</h1>
+    <p class="muted">Show your account's code to the camera, or choose a saved picture of it.</p>
+
+    @if (error(); as message) {
+      <p class="form-error" role="alert">{{ message }}</p>
+    }
+
+    <video #video [hidden]="!scanning()" muted playsinline aria-label="Camera preview"></video>
+
+    <div class="options">
+      @if (scanning()) {
+        <button matButton="outlined" type="button" (click)="stopCamera()">Stop camera</button>
+      } @else {
+        <button matButton="filled" type="button" [disabled]="busy()" (click)="startCamera()">
+          <mat-icon>photo_camera</mat-icon>
+          Use camera
+        </button>
+      }
+      <button matButton="outlined" type="button" [disabled]="busy()" (click)="file.click()">
+        <mat-icon>image</mat-icon>
+        Choose a picture
+      </button>
+      <input #file hidden type="file" accept="image/*" aria-label="Picture of a QR code" (change)="readFile(file)" />
+    </div>
+
+    <p class="auth-links">
+      <a routerLink="/login">Sign in with a password</a>
+    </p>
+  </main>
+</div>

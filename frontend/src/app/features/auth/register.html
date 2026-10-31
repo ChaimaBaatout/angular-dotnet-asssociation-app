@@ -1,0 +1,41 @@
+<div class="auth-page">
+  <main class="auth-card">
+    @if (sentTo(); as email) {
+      <h1>Check your email</h1>
+      <p class="muted">
+        We sent a message to <strong>{{ email }}</strong> with the next step. It can take a few minutes to arrive.
+      </p>
+      <a matButton="filled" class="full-width" routerLink="/login">Back to sign in</a>
+    } @else {
+      <h1>Create an account</h1>
+      <p class="muted">We will email you a link to choose your password.</p>
+
+      @if (error(); as message) {
+        <p class="form-error" role="alert">{{ message }}</p>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <mat-form-field class="full-width">
+          <mat-label>First name</mat-label>
+          <input matInput formControlName="firstName" autocomplete="given-name" />
+          <mat-error>{{ form.controls.firstName.getError('server') ?? 'Enter your first name.' }}</mat-error>
+        </mat-form-field>
+        <mat-form-field class="full-width">
+          <mat-label>Last name</mat-label>
+          <input matInput formControlName="lastName" autocomplete="family-name" />
+          <mat-error>{{ form.controls.lastName.getError('server') ?? 'Enter your last name.' }}</mat-error>
+        </mat-form-field>
+        <mat-form-field class="full-width">
+          <mat-label>Email</mat-label>
+          <input matInput type="email" formControlName="email" autocomplete="email" />
+          <mat-error>{{ form.controls.email.getError('server') ?? 'Enter a valid email address.' }}</mat-error>
+        </mat-form-field>
+        <button matButton="filled" class="full-width" type="submit" [disabled]="busy()">Create account</button>
+      </form>
+
+      <p class="auth-links">
+        <a routerLink="/login">I already have an account</a>
+      </p>
+    }
+  </main>
+</div>

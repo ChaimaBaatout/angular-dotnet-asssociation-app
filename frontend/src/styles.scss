@@ -1,0 +1,278 @@
+@use '@angular/material' as mat;
+
+html {
+  color-scheme: dark;
+  @include mat.theme(
+    (
+      color: (
+        primary: mat.$azure-palette,
+        tertiary: mat.$cyan-palette,
+      ),
+      typography: Roboto,
+      density: 0,
+    )
+  );
+
+  /* The generated dark palette has near-black surfaces. These give a baby blue on mid grey. */
+  @include mat.theme-overrides(
+    (
+      primary: #89cff0,
+      on-primary: #06283d,
+      primary-container: #1f4f6e,
+      on-primary-container: #d6efff,
+      secondary-container: #1f4f6e,
+      on-secondary-container: #d6efff,
+      background: #24252b,
+      on-background: #f1f1f5,
+      surface: #2c2d34,
+      on-surface: #f1f1f5,
+      surface-variant: #3a3b45,
+      on-surface-variant: #c8c8d2,
+      surface-container-lowest: #24252b,
+      surface-container-low: #30313a,
+      surface-container: #363741,
+      surface-container-high: #40414c,
+      surface-container-highest: #4a4b57,
+      outline: #9a9ba8,
+      outline-variant: #4d4e5a,
+    )
+  );
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--mat-sys-surface-container-lowest);
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-body-medium);
+}
+
+h1 {
+  margin: 0;
+  font: var(--mat-sys-headline-small);
+}
+
+h2 {
+  margin: 0 0 16px;
+  font: var(--mat-sys-title-medium);
+}
+
+/* Shared page layout */
+
+.page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.back-link {
+  margin: 0 0 8px -12px;
+}
+
+.panel {
+  box-sizing: border-box;
+  padding: 24px;
+  margin-bottom: 20px;
+  background: var(--mat-sys-surface);
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 12px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  gap: 4px 16px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.form-error {
+  margin: 0 0 16px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: var(--mat-sys-error-container);
+  color: var(--mat-sys-on-error-container);
+}
+
+.form-notice {
+  margin: 0 0 16px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: var(--mat-sys-primary-container);
+  color: var(--mat-sys-on-primary-container);
+}
+
+.muted {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.qr-button {
+  margin-top: 12px;
+}
+
+.auth-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin: 20px 0 0;
+
+  a {
+    color: var(--mat-sys-primary);
+  }
+}
+
+.password-form {
+  max-width: 480px;
+}
+
+.mismatch {
+  color: var(--mat-sys-error);
+}
+
+.status {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font: var(--mat-sys-label-medium);
+  white-space: nowrap;
+  background: var(--mat-sys-surface-container-high);
+  color: var(--mat-sys-on-surface-variant);
+
+  &.active {
+    background: var(--mat-sys-primary-container);
+    color: var(--mat-sys-on-primary-container);
+  }
+
+  &.warn {
+    background: var(--mat-sys-error-container);
+    color: var(--mat-sys-on-error-container);
+  }
+}
+
+.empty-state {
+  padding: 48px 16px;
+  text-align: center;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+/* Tables turn into stacked cards on small screens. Each cell needs a data-label attribute. */
+
+.table-panel {
+  --mat-table-row-item-outline-color: var(--mat-sys-outline-variant);
+  overflow: hidden;
+  background: var(--mat-sys-surface);
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 12px;
+
+  .mat-mdc-table {
+    background: transparent;
+  }
+
+  .actions-cell {
+    width: 56px;
+    text-align: right;
+  }
+}
+
+@media (max-width: 719.98px) {
+  table.responsive-table {
+    display: block;
+
+    thead {
+      display: none;
+    }
+
+    tbody {
+      display: block;
+    }
+
+    tr.mat-mdc-row {
+      position: relative;
+      display: block;
+      height: auto;
+      padding: 12px 56px 12px 16px;
+      border-bottom: 1px solid var(--mat-sys-outline-variant);
+    }
+
+    td.mat-mdc-cell {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 2px 8px;
+      min-height: 0;
+      padding: 3px 0;
+      border: 0;
+
+      &[data-label]:not([data-label=''])::before {
+        content: attr(data-label) ':';
+        color: var(--mat-sys-on-surface-variant);
+      }
+    }
+
+    td.actions-cell {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: auto;
+      padding: 0;
+    }
+  }
+
+  .panel {
+    padding: 16px;
+  }
+}
+
+/* Sign-in and forced password pages */
+
+.auth-page {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100dvh;
+  padding: 16px;
+  background:
+    radial-gradient(circle at 50% 0, rgb(137 207 240 / 16%), transparent 60%),
+    var(--mat-sys-surface-container-lowest);
+}
+
+.auth-card {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 420px;
+  padding: 32px;
+  background: var(--mat-sys-surface);
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 16px;
+  box-shadow: var(--mat-sys-level1);
+
+  h1 {
+    margin-bottom: 4px;
+  }
+
+  p.muted {
+    margin: 0 0 24px;
+  }
+
+  @media (max-width: 399.98px) {
+    padding: 24px 20px;
+  }
+}

@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/backend/">
+    <Project Path="backend/UserAdmin.Api/UserAdmin.Api.csproj" />
+    <Project Path="backend/UserAdmin.Tests/UserAdmin.Tests.csproj" />
+  </Folder>
+</Solution>

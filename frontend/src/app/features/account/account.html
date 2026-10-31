@@ -1,0 +1,47 @@
+<header class="page-header">
+  <h1>My account</h1>
+</header>
+
+<section class="panel">
+  <h2>Personal details</h2>
+  <p class="muted">
+    Signed in as {{ auth.user()?.email }} with the {{ auth.user()?.profileName }} profile. Only an administrator can
+    change your email or profile.
+  </p>
+
+  @if (error(); as message) {
+    <p class="form-error" role="alert">{{ message }}</p>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="save()" novalidate>
+    <div class="form-grid">
+      <mat-form-field>
+        <mat-label>First name</mat-label>
+        <input matInput formControlName="firstName" autocomplete="given-name" />
+        <mat-error>{{ form.controls.firstName.getError('server') ?? 'Enter your first name.' }}</mat-error>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>Last name</mat-label>
+        <input matInput formControlName="lastName" autocomplete="family-name" />
+        <mat-error>{{ form.controls.lastName.getError('server') ?? 'Enter your last name.' }}</mat-error>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>Phone number</mat-label>
+        <input matInput type="tel" formControlName="phoneNumber" autocomplete="tel" />
+        <mat-error>{{ form.controls.phoneNumber.getError('server') ?? 'Enter a valid phone number.' }}</mat-error>
+      </mat-form-field>
+    </div>
+    <div class="form-actions">
+      <button matButton="filled" type="submit" [disabled]="busy() || form.pristine">Save</button>
+    </div>
+  </form>
+</section>
+
+<section class="panel">
+  <h2>Password</h2>
+  <app-password-form (changed)="passwordChanged()" />
+</section>
+
+<section class="panel">
+  <app-qr-sign-in />
+</section>

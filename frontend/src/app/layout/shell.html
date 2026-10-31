@@ -1,0 +1,60 @@
+<mat-sidenav-container class="shell">
+  <mat-sidenav
+    #drawer
+    class="shell-nav"
+    [mode]="isCompact() ? 'over' : 'side'"
+    [opened]="!isCompact()"
+    [fixedInViewport]="true"
+  >
+    <div class="brand">
+      <mat-icon>shield_person</mat-icon>
+      <span>Admin Portal</span>
+    </div>
+    <mat-nav-list aria-label="Main">
+      @for (item of navItems(); track item.link) {
+        <a
+          mat-list-item
+          [routerLink]="item.link"
+          routerLinkActive
+          [routerLinkActiveOptions]="{ exact: item.exact }"
+          #active="routerLinkActive"
+          [activated]="active.isActive"
+          (click)="isCompact() && drawer.close()"
+        >
+          <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+          <span matListItemTitle>{{ item.label }}</span>
+        </a>
+      }
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <mat-toolbar class="shell-toolbar">
+      @if (isCompact()) {
+        <button matIconButton aria-label="Open navigation" (click)="drawer.open()">
+          <mat-icon>menu</mat-icon>
+        </button>
+        <span class="toolbar-title">Admin Portal</span>
+      }
+      <span class="spacer"></span>
+      <button matButton class="user-button" [matMenuTriggerFor]="userMenu" aria-label="Account menu">
+        <mat-icon>account_circle</mat-icon>
+        <span class="user-name">{{ auth.displayName() }}</span>
+      </button>
+      <mat-menu #userMenu="matMenu" xPosition="before">
+        <a mat-menu-item routerLink="/account">
+          <mat-icon>manage_accounts</mat-icon>
+          <span>My account</span>
+        </a>
+        <button mat-menu-item (click)="auth.logout()">
+          <mat-icon>logout</mat-icon>
+          <span>Sign out</span>
+        </button>
+      </mat-menu>
+    </mat-toolbar>
+
+    <main class="page">
+      <router-outlet />
+    </main>
+  </mat-sidenav-content>
+</mat-sidenav-container>

@@ -1,0 +1,63 @@
+<a matButton class="back-link" routerLink="/admin/profiles">
+  <mat-icon>arrow_back</mat-icon>
+  Profiles
+</a>
+
+<header class="page-header">
+  <h1>{{ id() ? (canEdit() ? 'Edit profile' : 'Profile details') : 'New profile' }}</h1>
+</header>
+
+@if (error(); as message) {
+  <p class="form-error" role="alert">{{ message }}</p>
+}
+
+@if (!loadFailed()) {
+  <section class="panel">
+    @if (profile()?.isSystem) {
+      <p class="muted">This is a system profile. It always has every permission and cannot be changed.</p>
+    }
+    @if (profile()?.isDefault) {
+      <p class="muted">
+        Anyone who signs up gets this profile, so every permission you add here is open to the public.
+      </p>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="save()" novalidate>
+      <mat-form-field class="full-width">
+        <mat-label>Name</mat-label>
+        <input matInput formControlName="name" autocomplete="off" />
+        <mat-error>{{ form.controls.name.getError('server') ?? 'Enter a name.' }}</mat-error>
+      </mat-form-field>
+      <mat-form-field class="full-width">
+        <mat-label>Description (optional)</mat-label>
+        <textarea matInput formControlName="description" rows="2"></textarea>
+        <mat-error>{{ form.controls.description.getError('server') ?? 'Use 500 characters or fewer.' }}</mat-error>
+      </mat-form-field>
+
+      <h2>Permissions</h2>
+      <div class="permission-groups">
+        @for (group of groups(); track group.name) {
+          <fieldset>
+            <legend>{{ group.name }}</legend>
+            @for (permission of group.permissions; track permission.code) {
+              <mat-checkbox
+                [checked]="selected().has(permission.code)"
+                [disabled]="!canToggle(permission.code)"
+                (change)="toggle(permission.code, $event.checked)"
+              >
+                {{ permission.label }}
+              </mat-checkbox>
+            }
+          </fieldset>
+        }
+      </div>
+
+      @if (canEdit()) {
+        <div class="form-actions">
+          <button matButton="filled" type="submit" [disabled]="busy()">{{ id() ? 'Save' : 'Create profile' }}</button>
+          <a matButton routerLink="/admin/profiles">Cancel</a>
+        </div>
+      }
+    </form>
+  </section>
+}
