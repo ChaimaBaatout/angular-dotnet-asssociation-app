@@ -82,3 +82,64 @@ public class RefreshToken
     public DateTimeOffset? RotatedAt { get; set; }
     public DateTimeOffset? RevokedAt { get; set; }
 }
+
+/// <summary>Details shared by suppliers and customers.</summary>
+public abstract class BusinessContact
+{
+    public int Id { get; set; }
+    public required string Name { get; set; }
+    public string? ContactName { get; set; }
+    public string? Email { get; set; }
+    public string? Phone { get; set; }
+    public string? Address { get; set; }
+    public string? City { get; set; }
+
+    /// <summary>The tax identification number (matricule fiscal) printed on invoices.</summary>
+    public string? TaxNumber { get; set; }
+
+    public string? Notes { get; set; }
+    public bool IsActive { get; set; } = true;
+    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
+    public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
+}
+
+public class Supplier : BusinessContact
+{
+    public List<Article> Articles { get; set; } = [];
+}
+
+public class Customer : BusinessContact;
+
+/// <summary>A spare part in the catalogue, with its stock on hand.</summary>
+public class Article
+{
+    public int Id { get; set; }
+
+    /// <summary>The part number used to order and find the article. Unique.</summary>
+    public required string Reference { get; set; }
+
+    public required string Name { get; set; }
+    public string? Brand { get; set; }
+    public string? Category { get; set; }
+
+    /// <summary>Free text listing the vehicles the part fits, searched along with the name.</summary>
+    public string? Compatibility { get; set; }
+
+    public string? Description { get; set; }
+
+    /// <summary>Where the part is kept, such as a shelf or bin.</summary>
+    public string? Location { get; set; }
+
+    public int? SupplierId { get; set; }
+    public Supplier? Supplier { get; set; }
+    public decimal PurchasePrice { get; set; }
+    public decimal SalePrice { get; set; }
+    public int Quantity { get; set; }
+
+    /// <summary>The article counts as low on stock once the quantity falls to this level.</summary>
+    public int MinimumStock { get; set; }
+
+    public bool IsActive { get; set; } = true;
+    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
+    public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
+}

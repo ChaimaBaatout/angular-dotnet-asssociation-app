@@ -49,6 +49,21 @@ dotnet test UserAdmin.slnx        # API tests; each run uses a temporary LocalDB
 cd frontend; npx ng test --watch=false
 ```
 
+## Business modules
+
+- **Articles:** the spare-parts catalogue. Each article has a unique reference (part number), brand, category,
+  compatible vehicles, shelf location, main supplier, purchase and sale prices, quantity in stock and a minimum stock.
+  An article is *low on stock* when its quantity is at or below the minimum. Search covers reference, name, brand
+  and compatible vehicles. The home page shows the number of active articles, how many are low or out of stock, and
+  the stock value at purchase price.
+- **Suppliers** and **Customers:** name, contact person, email, phone, address, city, tax number (matricule fiscal)
+  and notes. Names are unique. A supplier that articles still use cannot be deleted; deactivate it instead.
+- Prices are in TND with 3 decimals. The currency label is `CURRENCY` in `frontend/src/app/core/models.ts`.
+- Each module has a *view* and an *edit* permission, chosen per profile on the Profiles page. New accounts on
+  `Standard user` get none of them.
+
+Quantities are typed in directly for now; purchases and sales do not change stock yet.
+
 ## How access works
 
 A **profile** is a named set of permissions, and each user has one profile. The `Administrator` profile is

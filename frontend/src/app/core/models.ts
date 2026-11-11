@@ -98,9 +98,111 @@ export interface QrCodeResponse {
   expiresAt: string;
 }
 
+export interface Contact {
+  id: number;
+  name: string;
+  contactName: string | null;
+  email: string | null;
+  phone: string | null;
+  address: string | null;
+  city: string | null;
+  taxNumber: string | null;
+  notes: string | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SaveContactRequest {
+  name: string;
+  contactName: string | null;
+  email: string | null;
+  phone: string | null;
+  address: string | null;
+  city: string | null;
+  taxNumber: string | null;
+  notes: string | null;
+  isActive: boolean;
+}
+
+export interface ContactQuery {
+  search?: string;
+  isActive?: boolean | null;
+  page: number;
+  pageSize: number;
+}
+
+export interface ContactOption {
+  id: number;
+  name: string;
+}
+
+export interface Article {
+  id: number;
+  reference: string;
+  name: string;
+  brand: string | null;
+  category: string | null;
+  compatibility: string | null;
+  description: string | null;
+  location: string | null;
+  supplierId: number | null;
+  supplierName: string | null;
+  purchasePrice: number;
+  salePrice: number;
+  quantity: number;
+  minimumStock: number;
+  isLowStock: boolean;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SaveArticleRequest {
+  reference: string;
+  name: string;
+  brand: string | null;
+  category: string | null;
+  compatibility: string | null;
+  description: string | null;
+  location: string | null;
+  supplierId: number | null;
+  purchasePrice: number;
+  salePrice: number;
+  quantity: number;
+  minimumStock: number;
+  isActive: boolean;
+}
+
+export interface ArticleQuery {
+  search?: string;
+  category?: string | null;
+  supplierId?: number | null;
+  lowStock?: boolean | null;
+  isActive?: boolean | null;
+  page: number;
+  pageSize: number;
+}
+
+export interface ArticleStats {
+  total: number;
+  lowStock: number;
+  outOfStock: number;
+  stockValue: number;
+}
+
+/** Prices are stored with 3 decimals, as for millimes. */
+export const CURRENCY = 'TND';
+
 export const Permissions = {
   usersRead: 'users.read',
   usersWrite: 'users.write',
   profilesRead: 'profiles.read',
   profilesWrite: 'profiles.write',
+  articlesRead: 'articles.read',
+  articlesWrite: 'articles.write',
+  suppliersRead: 'suppliers.read',
+  suppliersWrite: 'suppliers.write',
+  customersRead: 'customers.read',
+  customersWrite: 'customers.write',
 } as const;

@@ -1,0 +1,118 @@
+<header class="page-header">
+  <h1>{{ info().plural }}</h1>
+  @if (canWrite()) {
+    <a matButton="filled" routerLink="new">
+      <mat-icon>add</mat-icon>
+      New {{ info().singular }}
+    </a>
+  }
+</header>
+
+<form class="filters" [formGroup]="filters">
+  <mat-form-field subscriptSizing="dynamic">
+    <mat-label>Search name, contact, phone, city or tax number</mat-label>
+    <mat-icon matPrefix>search</mat-icon>
+    <input matInput formControlName="search" type="search" />
+  </mat-form-field>
+  <mat-form-field subscriptSizing="dynamic">
+    <mat-label>Status</mat-label>
+    <mat-select formControlName="isActive">
+      <mat-option [value]="null">All</mat-option>
+      <mat-option [value]="true">Active</mat-option>
+      <mat-option [value]="false">Inactive</mat-option>
+    </mat-select>
+  </mat-form-field>
+</form>
+
+@if (error(); as message) {
+  <p class="form-error" role="alert">{{ message }}</p>
+}
+
+<div class="table-panel">
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  <table mat-table class="responsive-table" [dataSource]="contacts()">
+    <ng-container matColumnDef="name">
+      <th mat-header-cell *matHeaderCellDef>Name</th>
+      <td mat-cell *matCellDef="let contact" data-label="">
+        <div class="cell-stack">
+          <a class="cell-link" [routerLink]="[contact.id]">{{ contact.name }}</a>
+          @if (contact.email) {
+            <span class="muted wrap">{{ contact.email }}</span>
+          }
+        </div>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="contact">
+      <th mat-header-cell *matHeaderCellDef>Contact person</th>
+      <td mat-cell *matCellDef="let contact" data-label="Contact">{{ contact.contactName ?? '—' }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="phone">
+      <th mat-header-cell *matHeaderCellDef>Phone</th>
+      <td mat-cell *matCellDef="let contact" data-label="Phone">
+        @if (contact.phone) {
+          <a class="cell-link" [href]="'tel:' + contact.phone">{{ contact.phone }}</a>
+        } @else {
+          —
+        }
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="city">
+      <th mat-header-cell *matHeaderCellDef>City</th>
+      <td mat-cell *matCellDef="let contact" data-label="City">{{ contact.city ?? '—' }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="status">
+      <th mat-header-cell *matHeaderCellDef>Status</th>
+      <td mat-cell *matCellDef="let contact" data-label="Status">
+        @if (contact.isActive) {
+          <span class="status active">Active</span>
+        } @else {
+          <span class="status">Inactive</span>
+        }
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef><span class="cdk-visually-hidden">Actions</span></th>
+      <td mat-cell *matCellDef="let contact" class="actions-cell">
+        <button matIconButton [matMenuTriggerFor]="menu" [attr.aria-label]="'Actions for ' + contact.name">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+        <mat-menu #menu="matMenu" xPosition="before">
+          <a mat-menu-item [routerLink]="[contact.id]">
+            <mat-icon>{{ canWrite() ? 'edit' : 'visibility' }}</mat-icon>
+            <span>{{ canWrite() ? 'Edit' : 'View' }}</span>
+          </a>
+          @if (canWrite()) {
+            <button mat-menu-item (click)="delete(contact)">
+              <mat-icon>delete</mat-icon>
+              <span>Delete</span>
+            </button>
+          }
+        </mat-menu>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="columns"></tr>
+    <tr mat-row *matRowDef="let row; columns: columns"></tr>
+  </table>
+
+  @if (!loading() && contacts().length === 0 && !error()) {
+    <p class="empty-state">No {{ info().plural.toLowerCase() }} match these filters.</p>
+  }
+
+  <mat-paginator
+    [length]="total()"
+    [pageIndex]="page()"
+    [pageSize]="pageSize()"
+    [pageSizeOptions]="[10, 20, 50, 100]"
+    (page)="onPage($event)"
+    [attr.aria-label]="info().plural + ' pages'"
+  />
+</div>

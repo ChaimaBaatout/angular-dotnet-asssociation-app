@@ -11,19 +11,24 @@
       <span>Admin Portal</span>
     </div>
     <mat-nav-list aria-label="Main">
-      @for (item of navItems(); track item.link) {
-        <a
-          mat-list-item
-          [routerLink]="item.link"
-          routerLinkActive
-          [routerLinkActiveOptions]="{ exact: item.exact }"
-          #active="routerLinkActive"
-          [activated]="active.isActive"
-          (click)="isCompact() && drawer.close()"
-        >
-          <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
-          <span matListItemTitle>{{ item.label }}</span>
-        </a>
+      @for (section of navSections(); track section.title) {
+        @if (section.title) {
+          <h3 matSubheader class="nav-section">{{ section.title }}</h3>
+        }
+        @for (item of section.items; track item.link) {
+          <a
+            mat-list-item
+            [routerLink]="item.link"
+            routerLinkActive
+            [routerLinkActiveOptions]="{ exact: item.exact }"
+            #active="routerLinkActive"
+            [activated]="active.isActive"
+            (click)="isCompact() && drawer.close()"
+          >
+            <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+            <span matListItemTitle>{{ item.label }}</span>
+          </a>
+        }
       }
     </mat-nav-list>
   </mat-sidenav>

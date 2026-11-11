@@ -1,0 +1,83 @@
+<a matButton class="back-link" [routerLink]="listUrl()">
+  <mat-icon>arrow_back</mat-icon>
+  {{ info().plural }}
+</a>
+
+<header class="page-header">
+  <h1>
+    {{ id() ? (canWrite() ? 'Edit ' + info().singular : contact()?.name ?? '') : 'New ' + info().singular }}
+  </h1>
+</header>
+
+@if (error(); as message) {
+  <p class="form-error" role="alert">{{ message }}</p>
+}
+
+@if (!loadFailed()) {
+  <section class="panel">
+    <form [formGroup]="form" (ngSubmit)="save()" novalidate>
+      <div class="form-grid">
+        <mat-form-field>
+          <mat-label>Company or name</mat-label>
+          <input matInput formControlName="name" autocomplete="off" />
+          <mat-error>{{ form.controls.name.getError('server') ?? 'Enter a name.' }}</mat-error>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Contact person (optional)</mat-label>
+          <input matInput formControlName="contactName" autocomplete="off" />
+          <mat-error>{{ form.controls.contactName.getError('server') ?? 'Use 200 characters or fewer.' }}</mat-error>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Email (optional)</mat-label>
+          <input matInput type="email" formControlName="email" autocomplete="off" />
+          <mat-error>{{ form.controls.email.getError('server') ?? 'Enter a valid email address.' }}</mat-error>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Phone (optional)</mat-label>
+          <input matInput type="tel" formControlName="phone" autocomplete="off" />
+          <mat-error>{{ form.controls.phone.getError('server') ?? 'Enter a valid phone number.' }}</mat-error>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Address (optional)</mat-label>
+          <input matInput formControlName="address" autocomplete="off" />
+          <mat-error>{{ form.controls.address.getError('server') ?? 'Use 300 characters or fewer.' }}</mat-error>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>City (optional)</mat-label>
+          <input matInput formControlName="city" autocomplete="off" />
+          <mat-error>{{ form.controls.city.getError('server') ?? 'Use 100 characters or fewer.' }}</mat-error>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Tax number (optional)</mat-label>
+          <input matInput formControlName="taxNumber" autocomplete="off" />
+          <mat-hint>Matricule fiscal</mat-hint>
+          <mat-error>{{ form.controls.taxNumber.getError('server') ?? 'Use 50 characters or fewer.' }}</mat-error>
+        </mat-form-field>
+      </div>
+
+      <mat-form-field class="full-width">
+        <mat-label>Notes (optional)</mat-label>
+        <textarea matInput formControlName="notes" rows="3"></textarea>
+        <mat-error>{{ form.controls.notes.getError('server') ?? 'Use 1000 characters or fewer.' }}</mat-error>
+      </mat-form-field>
+
+      <p>
+        <mat-slide-toggle formControlName="isActive">Active</mat-slide-toggle>
+      </p>
+      @if (contact(); as current) {
+        <p class="muted">
+          Added {{ current.createdAt | date: 'mediumDate' }} · Last changed {{ current.updatedAt | date: 'medium' }}
+        </p>
+      }
+
+      @if (canWrite()) {
+        <div class="form-actions">
+          <button matButton="filled" type="submit" [disabled]="busy()">
+            {{ id() ? 'Save' : 'Create ' + info().singular }}
+          </button>
+          <a matButton [routerLink]="listUrl()">Cancel</a>
+        </div>
+      }
+    </form>
+  </section>
+}

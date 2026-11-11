@@ -1,0 +1,121 @@
+<a matButton class="back-link" routerLink="/articles">
+  <mat-icon>arrow_back</mat-icon>
+  Articles
+</a>
+
+<header class="page-header">
+  <h1>{{ id() ? (canWrite() ? 'Edit article' : 'Article details') : 'New article' }}</h1>
+</header>
+
+@if (error(); as message) {
+  <p class="form-error" role="alert">{{ message }}</p>
+}
+
+@if (!loadFailed()) {
+  <form [formGroup]="form" (ngSubmit)="save()" novalidate>
+    <section class="panel">
+      <h2>Article</h2>
+      <div class="form-grid">
+        <mat-form-field>
+          <mat-label>Reference</mat-label>
+          <input matInput formControlName="reference" autocomplete="off" />
+          <mat-hint>The part number, unique in the catalogue</mat-hint>
+          <mat-error>{{ form.controls.reference.getError('server') ?? 'Enter a reference of up to 50 characters.' }}</mat-error>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Name</mat-label>
+          <input matInput formControlName="name" autocomplete="off" />
+          <mat-error>{{ form.controls.name.getError('server') ?? 'Enter a name.' }}</mat-error>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Brand (optional)</mat-label>
+          <input matInput formControlName="brand" autocomplete="off" />
+          <mat-error>{{ form.controls.brand.getError('server') ?? 'Use 100 characters or fewer.' }}</mat-error>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Category (optional)</mat-label>
+          <input matInput formControlName="category" autocomplete="off" [matAutocomplete]="categoryList" />
+          <mat-autocomplete #categoryList="matAutocomplete">
+            @for (category of categorySuggestions(); track category) {
+              <mat-option [value]="category">{{ category }}</mat-option>
+            }
+          </mat-autocomplete>
+          <mat-error>{{ form.controls.category.getError('server') ?? 'Use 100 characters or fewer.' }}</mat-error>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Supplier (optional)</mat-label>
+          <mat-select formControlName="supplierId">
+            <mat-option [value]="null">No supplier</mat-option>
+            @for (supplier of suppliers(); track supplier.id) {
+              <mat-option [value]="supplier.id">{{ supplier.name }}</mat-option>
+            }
+          </mat-select>
+          <mat-error>{{ form.controls.supplierId.getError('server') ?? 'Choose a supplier.' }}</mat-error>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Location (optional)</mat-label>
+          <input matInput formControlName="location" autocomplete="off" />
+          <mat-hint>Shelf or bin, such as A-12</mat-hint>
+          <mat-error>{{ form.controls.location.getError('server') ?? 'Use 50 characters or fewer.' }}</mat-error>
+        </mat-form-field>
+      </div>
+
+      <mat-form-field class="full-width">
+        <mat-label>Compatible vehicles (optional)</mat-label>
+        <textarea matInput formControlName="compatibility" rows="2" placeholder="Peugeot 208 1.6 HDi 2012–2019"></textarea>
+        <mat-hint>Included in searches</mat-hint>
+        <mat-error>{{ form.controls.compatibility.getError('server') ?? 'Use 500 characters or fewer.' }}</mat-error>
+      </mat-form-field>
+      <mat-form-field class="full-width">
+        <mat-label>Description (optional)</mat-label>
+        <textarea matInput formControlName="description" rows="3"></textarea>
+        <mat-error>{{ form.controls.description.getError('server') ?? 'Use 1000 characters or fewer.' }}</mat-error>
+      </mat-form-field>
+    </section>
+
+    <section class="panel">
+      <h2>Prices and stock</h2>
+      <div class="form-grid">
+        <mat-form-field>
+          <mat-label>Purchase price</mat-label>
+          <input matInput type="number" min="0" step="0.001" formControlName="purchasePrice" />
+          <span matTextSuffix>{{ currency }}</span>
+          <mat-error>{{ form.controls.purchasePrice.getError('server') ?? 'Enter a price of 0 or more, with up to 3 decimals.' }}</mat-error>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Sale price</mat-label>
+          <input matInput type="number" min="0" step="0.001" formControlName="salePrice" />
+          <span matTextSuffix>{{ currency }}</span>
+          <mat-error>{{ form.controls.salePrice.getError('server') ?? 'Enter a price of 0 or more, with up to 3 decimals.' }}</mat-error>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Quantity in stock</mat-label>
+          <input matInput type="number" min="0" step="1" formControlName="quantity" />
+          <mat-error>{{ form.controls.quantity.getError('server') ?? 'Enter a whole number of 0 or more.' }}</mat-error>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Minimum stock</mat-label>
+          <input matInput type="number" min="0" step="1" formControlName="minimumStock" />
+          <mat-hint>Warn when stock falls to this level</mat-hint>
+          <mat-error>{{ form.controls.minimumStock.getError('server') ?? 'Enter a whole number of 0 or more.' }}</mat-error>
+        </mat-form-field>
+      </div>
+
+      <p>
+        <mat-slide-toggle formControlName="isActive">Active in the catalogue</mat-slide-toggle>
+      </p>
+      @if (article(); as current) {
+        <p class="muted">
+          Added {{ current.createdAt | date: 'mediumDate' }} · Last changed {{ current.updatedAt | date: 'medium' }}
+        </p>
+      }
+
+      @if (canWrite()) {
+        <div class="form-actions">
+          <button matButton="filled" type="submit" [disabled]="busy()">{{ id() ? 'Save' : 'Create article' }}</button>
+          <a matButton routerLink="/articles">Cancel</a>
+        </div>
+      }
+    </section>
+  </form>
+}

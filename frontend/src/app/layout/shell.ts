@@ -12,6 +12,13 @@ import { map } from 'rxjs';
 import { AuthService } from '../core/auth.service';
 import { Permissions } from '../core/models';
 
+interface NavItem {
+  label: string;
+  icon: string;
+  link: string;
+  exact: boolean;
+}
+
 @Component({
   selector: 'app-shell',
   imports: [
@@ -38,14 +45,33 @@ export class Shell {
     { initialValue: false },
   );
 
-  protected readonly navItems = computed(() => {
-    const items = [{ label: 'Home', icon: 'home', link: '/', exact: true }];
-    if (this.auth.user()?.permissions.includes(Permissions.usersRead)) {
-      items.push({ label: 'Users', icon: 'group', link: '/admin/users', exact: false });
-    }
-    if (this.auth.user()?.permissions.includes(Permissions.profilesRead)) {
-      items.push({ label: 'Profiles', icon: 'admin_panel_settings', link: '/admin/profiles', exact: false });
-    }
-    return items;
+  /** Menu sections, each showing only the pages the user may open. Empty sections are left out. */
+  protected readonly navSections = computed(() => {
+    const allowed = (items: (NavItem & { permission: string })[]) =>
+      items.filter((item) => this.auth.can(item.permission));
+    return [
+      { title: null, items: [{ label: 'Home', icon: 'home', link: '/', exact: true }] },
+      {
+        title: 'Business',
+        items: allowed([
+          { label: 'Articles', icon: 'inventory_2', link: '/articles', exact: false, permission: Permissions.articlesRead },
+          { label: 'Suppliers', icon: 'local_shipping', link: '/suppliers', exact: false, permission: Permissions.suppliersRead },
+          { label: 'Customers', icon: 'storefront', link: '/customers', exact: false, permission: Permissions.customersRead },
+        ]),
+      },
+      {
+        title: 'Administration',
+        items: allowed([
+          { label: 'Users', icon: 'group', link: '/admin/users', exact: false, permission: Permissions.usersRead },
+          {
+            label: 'Profiles',
+            icon: 'admin_panel_settings',
+            link: '/admin/profiles',
+            exact: false,
+            permission: Permissions.profilesRead,
+          },
+        ]),
+      },
+    ].filter((section) => section.items.length > 0);
   });
 }

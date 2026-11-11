@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using UserAdmin.Api.Domain;
 
 namespace UserAdmin.Api.Data;
@@ -10,6 +11,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<ProfilePermission> ProfilePermissions => Set<ProfilePermission>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<UserToken> UserTokens => Set<UserToken>();
+    public DbSet<Supplier> Suppliers => Set<Supplier>();
+    public DbSet<Customer> Customers => Set<Customer>();
+    public DbSet<Article> Articles => Set<Article>();
 
     protected override void OnModelCreating(ModelBuilder model)
     {
@@ -57,5 +61,38 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             e.HasOne<User>().WithMany(u => u.RefreshTokens).HasForeignKey(t => t.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
+
+        model.Entity<Supplier>(ConfigureContact);
+        model.Entity<Customer>(ConfigureContact);
+
+        model.Entity<Article>(e =>
+        {
+            e.Property(a => a.Reference).HasMaxLength(50);
+            e.Property(a => a.Name).HasMaxLength(200);
+            e.Property(a => a.Brand).HasMaxLength(100);
+            e.Property(a => a.Category).HasMaxLength(100);
+            e.Property(a => a.Compatibility).HasMaxLength(500);
+            e.Property(a => a.Description).HasMaxLength(1000);
+            e.Property(a => a.Location).HasMaxLength(50);
+            e.Property(a => a.PurchasePrice).HasPrecision(18, 3);
+            e.Property(a => a.SalePrice).HasPrecision(18, 3);
+            e.HasIndex(a => a.Reference).IsUnique();
+            e.HasIndex(a => a.Name);
+            e.HasOne(a => a.Supplier).WithMany(s => s.Articles).HasForeignKey(a => a.SupplierId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+    }
+
+    private static void ConfigureContact<T>(EntityTypeBuilder<T> e) where T : BusinessContact
+    {
+        e.Property(c => c.Name).HasMaxLength(200);
+        e.Property(c => c.ContactName).HasMaxLength(200);
+        e.Property(c => c.Email).HasMaxLength(256);
+        e.Property(c => c.Phone).HasMaxLength(30);
+        e.Property(c => c.Address).HasMaxLength(300);
+        e.Property(c => c.City).HasMaxLength(100);
+        e.Property(c => c.TaxNumber).HasMaxLength(50);
+        e.Property(c => c.Notes).HasMaxLength(1000);
+        e.HasIndex(c => c.Name).IsUnique();
     }
 }

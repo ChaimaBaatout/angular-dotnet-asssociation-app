@@ -164,6 +164,33 @@ h2 {
     background: var(--mat-sys-error-container);
     color: var(--mat-sys-on-error-container);
   }
+
+  &.low {
+    background: #5a4512;
+    color: #ffe3a3;
+  }
+}
+
+/* A list cell with a link on top and details below */
+
+.cell-stack {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.cell-link {
+  color: var(--mat-sys-primary);
+  font-weight: 500;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.wrap {
+  overflow-wrap: anywhere;
 }
 
 .empty-state {

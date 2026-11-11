@@ -1,0 +1,138 @@
+<header class="page-header">
+  <h1>Articles</h1>
+  @if (canWrite()) {
+    <a matButton="filled" routerLink="new">
+      <mat-icon>add</mat-icon>
+      New article
+    </a>
+  }
+</header>
+
+<form class="filters" [formGroup]="filters">
+  <mat-form-field class="search" subscriptSizing="dynamic">
+    <mat-label>Search reference, name, brand or vehicle</mat-label>
+    <mat-icon matPrefix>search</mat-icon>
+    <input matInput formControlName="search" type="search" />
+  </mat-form-field>
+  <mat-form-field subscriptSizing="dynamic">
+    <mat-label>Category</mat-label>
+    <mat-select formControlName="category">
+      <mat-option [value]="null">All categories</mat-option>
+      @for (category of categories(); track category) {
+        <mat-option [value]="category">{{ category }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+  <mat-form-field subscriptSizing="dynamic">
+    <mat-label>Supplier</mat-label>
+    <mat-select formControlName="supplierId">
+      <mat-option [value]="null">All suppliers</mat-option>
+      @for (supplier of suppliers(); track supplier.id) {
+        <mat-option [value]="supplier.id">{{ supplier.name }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+  <mat-form-field subscriptSizing="dynamic">
+    <mat-label>Stock</mat-label>
+    <mat-select formControlName="lowStock">
+      <mat-option [value]="null">All</mat-option>
+      <mat-option [value]="true">Low or out of stock</mat-option>
+      <mat-option [value]="false">In stock</mat-option>
+    </mat-select>
+  </mat-form-field>
+  <mat-form-field subscriptSizing="dynamic">
+    <mat-label>Status</mat-label>
+    <mat-select formControlName="isActive">
+      <mat-option [value]="null">All</mat-option>
+      <mat-option [value]="true">Active</mat-option>
+      <mat-option [value]="false">Inactive</mat-option>
+    </mat-select>
+  </mat-form-field>
+</form>
+
+@if (error(); as message) {
+  <p class="form-error" role="alert">{{ message }}</p>
+}
+
+<div class="table-panel">
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  <table mat-table class="responsive-table" [dataSource]="articles()">
+    <ng-container matColumnDef="article">
+      <th mat-header-cell *matHeaderCellDef>Article</th>
+      <td mat-cell *matCellDef="let article" data-label="">
+        <div class="cell-stack">
+          <a class="cell-link" [routerLink]="[article.id]">{{ article.name }}</a>
+          <span class="muted wrap">
+            {{ article.reference }}{{ article.brand ? ' · ' + article.brand : '' }}{{ article.isActive ? '' : ' · Inactive' }}
+          </span>
+        </div>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="supplier">
+      <th mat-header-cell *matHeaderCellDef>Supplier</th>
+      <td mat-cell *matCellDef="let article" data-label="Supplier">{{ article.supplierName ?? '—' }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="stock">
+      <th mat-header-cell *matHeaderCellDef>Stock</th>
+      <td mat-cell *matCellDef="let article" data-label="Stock">
+        <span class="stock">
+          {{ article.quantity | number }}
+          @if (article.quantity === 0) {
+            <span class="status warn">Out of stock</span>
+          } @else if (article.isLowStock) {
+            <span class="status low">Low</span>
+          }
+        </span>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="price">
+      <th mat-header-cell *matHeaderCellDef>Sale price</th>
+      <td mat-cell *matCellDef="let article" data-label="Sale price">
+        {{ article.salePrice | number: '1.3-3' }} {{ currency }}
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef><span class="cdk-visually-hidden">Actions</span></th>
+      <td mat-cell *matCellDef="let article" class="actions-cell">
+        <button matIconButton [matMenuTriggerFor]="menu" [attr.aria-label]="'Actions for ' + article.reference">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+        <mat-menu #menu="matMenu" xPosition="before">
+          <a mat-menu-item [routerLink]="[article.id]">
+            <mat-icon>{{ canWrite() ? 'edit' : 'visibility' }}</mat-icon>
+            <span>{{ canWrite() ? 'Edit' : 'View' }}</span>
+          </a>
+          @if (canWrite()) {
+            <button mat-menu-item (click)="delete(article)">
+              <mat-icon>delete</mat-icon>
+              <span>Delete</span>
+            </button>
+          }
+        </mat-menu>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="columns"></tr>
+    <tr mat-row *matRowDef="let row; columns: columns"></tr>
+  </table>
+
+  @if (!loading() && articles().length === 0 && !error()) {
+    <p class="empty-state">No articles match these filters.</p>
+  }
+
+  <mat-paginator
+    [length]="total()"
+    [pageIndex]="page()"
+    [pageSize]="pageSize()"
+    [pageSizeOptions]="[10, 20, 50, 100]"
+    (page)="onPage($event)"
+    aria-label="Articles pages"
+  />
+</div>

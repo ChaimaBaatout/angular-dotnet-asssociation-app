@@ -19,6 +19,15 @@
   color: var(--mat-sys-primary);
 }
 
+.nav-section {
+  margin: 12px 0 0;
+  padding: 0 20px;
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-label-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
 .shell-toolbar {
   position: sticky;
   top: 0;
