@@ -303,3 +303,20 @@ h2 {
     padding: 24px 20px;
   }
 }
+
+/* Printing, used by the order sheet */
+
+@page {
+  size: A4;
+  margin: 14mm;
+}
+
+@media print {
+  html {
+    color-scheme: light;
+  }
+
+  body {
+    background: #fff;
+  }
+}

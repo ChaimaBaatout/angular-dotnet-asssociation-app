@@ -69,6 +69,13 @@ export const routes: Routes = [
     loadComponent: () => import('./features/auth/change-password').then((m) => m.ChangePassword),
   },
   {
+    // Outside the shell, so the page prints without the menu and toolbar.
+    path: 'orders/:id/print',
+    canActivate: [authGuard, permissionGuard(Permissions.ordersRead)],
+    title: 'Print order',
+    loadComponent: () => import('./features/orders/order-print').then((m) => m.OrderPrint),
+  },
+  {
     path: '',
     canActivate: [authGuard],
     loadComponent: () => import('./layout/shell').then((m) => m.Shell),
@@ -83,6 +90,24 @@ export const routes: Routes = [
         path: 'account',
         title: 'My account',
         loadComponent: () => import('./features/account/account').then((m) => m.Account),
+      },
+      {
+        path: 'orders',
+        canActivate: [permissionGuard(Permissions.ordersRead)],
+        title: 'Orders',
+        loadComponent: () => import('./features/orders/order-list').then((m) => m.OrderList),
+      },
+      {
+        path: 'orders/new',
+        canActivate: [permissionGuard(Permissions.ordersWrite)],
+        title: 'New order',
+        loadComponent: () => import('./features/orders/order-form').then((m) => m.OrderForm),
+      },
+      {
+        path: 'orders/:id',
+        canActivate: [permissionGuard(Permissions.ordersRead)],
+        title: 'Order details',
+        loadComponent: () => import('./features/orders/order-form').then((m) => m.OrderForm),
       },
       {
         path: 'articles',

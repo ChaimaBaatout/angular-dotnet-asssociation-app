@@ -191,8 +191,126 @@ export interface ArticleStats {
   stockValue: number;
 }
 
+export interface ArticleOption {
+  id: number;
+  reference: string;
+  name: string;
+  brand: string | null;
+  salePrice: number;
+  quantity: number;
+}
+
+export type PaymentStatus = 'NotPaid' | 'PartiallyPaid' | 'Paid';
+
+export const PAYMENT_STATUSES: { value: PaymentStatus; label: string }[] = [
+  { value: 'NotPaid', label: 'Not paid' },
+  { value: 'PartiallyPaid', label: 'Partially paid' },
+  { value: 'Paid', label: 'Paid' },
+];
+
+export function paymentLabel(status: PaymentStatus): string {
+  return PAYMENT_STATUSES.find((s) => s.value === status)!.label;
+}
+
+/** Orders have no stored number; it is formed from the id, and the API search accepts it. */
+export function orderNumber(id: number): string {
+  return `ORD-${String(id).padStart(5, '0')}`;
+}
+
+/** The rate the API applies to new orders. Must match OrdersController.VatRate. */
+export const VAT_RATE = 0.19;
+
+export interface OrderSummary {
+  id: number;
+  orderDate: string;
+  customerId: number | null;
+  customerName: string | null;
+  lineCount: number;
+  total: number;
+  paymentStatus: PaymentStatus;
+  amountPaid: number;
+  amountDue: number;
+  createdAt: string;
+}
+
+export interface OrderCustomer {
+  id: number;
+  name: string;
+  address: string | null;
+  city: string | null;
+  phone: string | null;
+  email: string | null;
+  taxNumber: string | null;
+}
+
+export interface OrderLine {
+  id: number;
+  articleId: number;
+  reference: string;
+  name: string;
+  quantity: number;
+  unitPrice: number;
+  lineTotal: number;
+}
+
+export interface Order {
+  id: number;
+  orderDate: string;
+  customer: OrderCustomer | null;
+  notes: string | null;
+  lines: OrderLine[];
+  vatRate: number;
+  subtotal: number;
+  vatAmount: number;
+  total: number;
+  paymentStatus: PaymentStatus;
+  amountPaid: number;
+  amountDue: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SavePaymentRequest {
+  paymentStatus: PaymentStatus;
+  /** Only read for a partial payment. */
+  amountPaid: number;
+}
+
+export interface SaveOrderRequest extends SavePaymentRequest {
+  orderDate: string;
+  customerId: number | null;
+  notes: string | null;
+  lines: { articleId: number; quantity: number; unitPrice: number }[];
+}
+
+export interface OrderQuery {
+  search?: string;
+  paymentStatus?: PaymentStatus | null;
+  customerId?: number | null;
+  page: number;
+  pageSize: number;
+}
+
+export interface OrderStats {
+  outstanding: number;
+  amountDue: number;
+}
+
+export interface Company {
+  name: string;
+  address: string | null;
+  phone: string | null;
+  email: string | null;
+  taxNumber: string | null;
+}
+
 /** Prices are stored with 3 decimals, as for millimes. */
 export const CURRENCY = 'TND';
+
+/** Rounds to millimes the way the API does, half away from zero. */
+export function roundMoney(value: number): number {
+  return Math.sign(value) * Math.round(Math.abs(value) * 1000 + Number.EPSILON) / 1000;
+}
 
 export const Permissions = {
   usersRead: 'users.read',
@@ -205,4 +323,6 @@ export const Permissions = {
   suppliersWrite: 'suppliers.write',
   customersRead: 'customers.read',
   customersWrite: 'customers.write',
+  ordersRead: 'orders.read',
+  ordersWrite: 'orders.write',
 } as const;

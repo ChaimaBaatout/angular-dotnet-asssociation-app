@@ -1,0 +1,125 @@
+<div class="toolbar">
+  <a matButton [routerLink]="['/orders', id()]">
+    <mat-icon>arrow_back</mat-icon>
+    Back to the order
+  </a>
+  <span class="hint">In the print dialog, choose <strong>Save as PDF</strong> as the printer to get a PDF file.</span>
+  <button matButton="filled" type="button" [disabled]="!order()" (click)="printNow()">
+    <mat-icon>print</mat-icon>
+    Print or save as PDF
+  </button>
+</div>
+
+@if (error(); as message) {
+  <p class="form-error" role="alert">{{ message }}</p>
+}
+
+@if (order(); as o) {
+  <article class="sheet">
+    <header class="top">
+      <div class="seller">
+        @if (company(); as c) {
+          <p class="seller-name">{{ c.name }}</p>
+          @if (c.address) {
+            <p class="pre">{{ c.address }}</p>
+          }
+          @if (c.phone || c.email) {
+            <p>{{ c.phone }}{{ c.phone && c.email ? ' · ' : '' }}{{ c.email }}</p>
+          }
+          @if (c.taxNumber) {
+            <p>Tax number (MF): {{ c.taxNumber }}</p>
+          }
+        }
+      </div>
+      <div class="document">
+        <h1>Order</h1>
+        <p class="doc-number">{{ number() }}</p>
+        <p>Date: {{ o.orderDate | date: 'longDate' : 'UTC' }}</p>
+      </div>
+    </header>
+
+    <section class="customer">
+      <h2>Customer</h2>
+      @if (o.customer; as customer) {
+        <p class="customer-name">{{ customer.name }}</p>
+        @if (customer.address || customer.city) {
+          <p>{{ customer.address }}{{ customer.address && customer.city ? ', ' : '' }}{{ customer.city }}</p>
+        }
+        @if (customer.phone || customer.email) {
+          <p>{{ customer.phone }}{{ customer.phone && customer.email ? ' · ' : '' }}{{ customer.email }}</p>
+        }
+        @if (customer.taxNumber) {
+          <p>Tax number (MF): {{ customer.taxNumber }}</p>
+        }
+      } @else {
+        <p class="customer-name">Walk-in customer</p>
+      }
+    </section>
+
+    <table class="lines">
+      <thead>
+        <tr>
+          <th>Reference</th>
+          <th>Description</th>
+          <th class="num">Qty</th>
+          <th class="num">Unit price excl. VAT</th>
+          <th class="num">Total excl. VAT</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (line of o.lines; track line.id) {
+          <tr>
+            <td class="ref">{{ line.reference }}</td>
+            <td>{{ line.name }}</td>
+            <td class="num">{{ line.quantity | number }}</td>
+            <td class="num">{{ line.unitPrice | number: '1.3-3' }}</td>
+            <td class="num">{{ line.lineTotal | number: '1.3-3' }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    <div class="bottom">
+      <div class="payment">
+        <h2>Payment</h2>
+        <p class="payment-status">{{ paymentLabel(o.paymentStatus) }}</p>
+        @if (o.paymentStatus === 'PartiallyPaid') {
+          <p>Paid: {{ o.amountPaid | number: '1.3-3' }} {{ currency }}</p>
+        }
+        @if (o.notes) {
+          <h2 class="notes-title">Notes</h2>
+          <p class="pre">{{ o.notes }}</p>
+        }
+      </div>
+
+      <table class="totals">
+        <tbody>
+          <tr>
+            <th>Subtotal excl. VAT</th>
+            <td>{{ o.subtotal | number: '1.3-3' }}</td>
+          </tr>
+          <tr>
+            <th>VAT {{ o.vatRate * 100 | number: '1.0-2' }}%</th>
+            <td>{{ o.vatAmount | number: '1.3-3' }}</td>
+          </tr>
+          <tr class="grand">
+            <th>Total incl. VAT</th>
+            <td>{{ o.total | number: '1.3-3' }} {{ currency }}</td>
+          </tr>
+          @if (o.paymentStatus !== 'NotPaid') {
+            <tr>
+              <th>Paid</th>
+              <td>{{ o.amountPaid | number: '1.3-3' }}</td>
+            </tr>
+          }
+          <tr class="due">
+            <th>Amount due</th>
+            <td>{{ o.amountDue | number: '1.3-3' }} {{ currency }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <footer class="foot">Amounts in {{ currency }}.</footer>
+  </article>
+}

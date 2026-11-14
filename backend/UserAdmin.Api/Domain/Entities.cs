@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace UserAdmin.Api.Domain;
 
 public class User
@@ -142,4 +144,58 @@ public class Article
     public bool IsActive { get; set; } = true;
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
     public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
+}
+
+[JsonConverter(typeof(JsonStringEnumConverter<PaymentStatus>))]
+public enum PaymentStatus
+{
+    NotPaid,
+    PartiallyPaid,
+    Paid,
+}
+
+/// <summary>A sale. Its lines take their quantities out of stock until the order is changed or deleted.</summary>
+public class Order
+{
+    public int Id { get; set; }
+    public DateOnly OrderDate { get; set; }
+
+    /// <summary>Empty for a walk-in sale.</summary>
+    public int? CustomerId { get; set; }
+
+    public Customer? Customer { get; set; }
+    public string? Notes { get; set; }
+
+    /// <summary>The VAT rate when the order was created, such as 0.19, so a later change of rate leaves it as it was.</summary>
+    public decimal VatRate { get; set; }
+
+    /// <summary>Total before tax.</summary>
+    public decimal Subtotal { get; set; }
+
+    public decimal VatAmount { get; set; }
+
+    /// <summary>Total including tax.</summary>
+    public decimal Total { get; set; }
+
+    public PaymentStatus PaymentStatus { get; set; }
+    public decimal AmountPaid { get; set; }
+    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
+    public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
+    public List<OrderLine> Lines { get; set; } = [];
+}
+
+public class OrderLine
+{
+    public int Id { get; set; }
+    public int OrderId { get; set; }
+    public int ArticleId { get; set; }
+
+    /// <summary>The article's reference and name when the order was saved, so it prints as it was sold.</summary>
+    public required string Reference { get; set; }
+
+    public required string Name { get; set; }
+    public int Quantity { get; set; }
+
+    /// <summary>Price before tax.</summary>
+    public decimal UnitPrice { get; set; }
 }

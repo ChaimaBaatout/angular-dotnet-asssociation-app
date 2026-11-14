@@ -58,11 +58,21 @@ cd frontend; npx ng test --watch=false
   the stock value at purchase price.
 - **Suppliers** and **Customers:** name, contact person, email, phone, address, city, tax number (matricule fiscal)
   and notes. Names are unique. A supplier that articles still use cannot be deleted; deactivate it instead.
+- **Orders:** sales of articles, to a customer or to a walk-in customer. Each line starts at the article's sale
+  price, which can be changed. Prices are before tax, and 19% VAT is added (`OrdersController.VatRate`, mirrored by
+  `VAT_RATE` in `models.ts`); each order keeps the rate it was created with. Numbers are `ORD-` and the order's id.
+  - **Stock:** saving an order takes its quantities out of stock, and an order cannot take more than is in stock.
+    Editing an order puts the old quantities back and takes the new ones; deleting it puts them back. Articles and
+    customers on an order cannot be deleted; deactivate them instead.
+  - **Payment:** *Not paid*, *Partially paid* with the amount paid, or *Paid*. Change it in the order or by clicking
+    the status in the list, which also shows how much is still due.
+  - **Printing:** *Print or save as PDF* opens the order as an A4 page and the browser's print dialog. Choose *Save as
+    PDF* as the printer to get a file. The seller details at the top come from the `Company` settings below.
 - Prices are in TND with 3 decimals. The currency label is `CURRENCY` in `frontend/src/app/core/models.ts`.
 - Each module has a *view* and an *edit* permission, chosen per profile on the Profiles page. New accounts on
   `Standard user` get none of them.
 
-Quantities are typed in directly for now; purchases and sales do not change stock yet.
+Article quantities are typed in directly or changed by orders; purchases from suppliers do not change stock yet.
 
 ## How access works
 
@@ -115,6 +125,7 @@ with the computer's camera or from a saved picture. Browsers only allow camera a
 | `Email:SmtpPort`, `Email:EnableSsl` | Mail server connection | `587`, `true` |
 | `Email:Username`, `Email:Password` | Mail server login | None |
 | `Email:From` | Sender address | Required with `Email:SmtpHost` |
+| `Company:Name`, `Address`, `Phone`, `Email`, `TaxNumber` | Seller details printed on orders | `Your company`, others blank |
 | `Seed:AdminEmail` | First administrator's email | `admin@example.com` |
 | `Seed:AdminPassword` | First administrator's password | Generated and printed |
 | `RateLimiting:LoginPermitPerMinute` | Sign-in attempts per IP per minute | `10` |

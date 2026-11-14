@@ -46,6 +46,23 @@ public class ArticlesController(AppDbContext db) : ControllerBase
         await db.Articles.AsNoTracking().Where(a => a.Category != null)
             .Select(a => a.Category!).Distinct().OrderBy(c => c).ToListAsync();
 
+    /// <summary>Active articles matching a search, for adding to an order without needing the articles permission.</summary>
+    [HttpGet("options")]
+    [Authorize(Permissions.OrdersWrite)]
+    public async Task<IReadOnlyList<ArticleOptionDto>> Options(string? search)
+    {
+        var query = db.Articles.AsNoTracking().Where(a => a.IsActive);
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var term = search.Trim();
+            query = query.Where(a => a.Reference.Contains(term) || a.Name.Contains(term)
+                || a.Brand!.Contains(term) || a.Compatibility!.Contains(term));
+        }
+        return await query.OrderBy(a => a.Name).ThenBy(a => a.Reference).Take(20)
+            .Select(a => new ArticleOptionDto(a.Id, a.Reference, a.Name, a.Brand, a.SalePrice, a.Quantity))
+            .ToListAsync();
+    }
+
     [HttpGet("stats")]
     [Authorize(Permissions.ArticlesRead)]
     public async Task<ArticleStatsDto> Stats()
@@ -103,6 +120,19 @@ public class ArticlesController(AppDbContext db) : ControllerBase
     {
         var article = await db.Articles.SingleOrDefaultAsync(a => a.Id == id);
         if (article is null) return NotFound();
+
+        var orders = await db.OrderLines.Where(l => l.ArticleId == id).Select(l => l.OrderId).Distinct().CountAsync();
+        if (orders > 0)
+        {
+            return Conflict(new ProblemDetails
+            {
+                Status = StatusCodes.Status409Conflict,
+                Title = "Conflict",
+                Detail = orders == 1
+                    ? "This article is on 1 order. Deactivate it instead."
+                    : $"This article is on {orders} orders. Deactivate it instead.",
+            });
+        }
 
         db.Articles.Remove(article);
         await db.SaveChangesAsync();

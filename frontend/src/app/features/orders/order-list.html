@@ -1,0 +1,158 @@
+<header class="page-header">
+  <h1>Orders</h1>
+  @if (canWrite()) {
+    <a matButton="filled" routerLink="new">
+      <mat-icon>add</mat-icon>
+      New order
+    </a>
+  }
+</header>
+
+@if (stats(); as s) {
+  <p class="summary muted">
+    @if (s.outstanding) {
+      {{ s.outstanding | number }} {{ s.outstanding === 1 ? 'order is' : 'orders are' }} not fully paid ·
+      <strong>{{ s.amountDue | number: '1.3-3' }} {{ currency }}</strong> still due
+    } @else {
+      Every order is paid.
+    }
+  </p>
+}
+
+<form class="filters" [formGroup]="filters">
+  <mat-form-field class="search" subscriptSizing="dynamic">
+    <mat-label>Search order number or customer</mat-label>
+    <mat-icon matPrefix>search</mat-icon>
+    <input matInput formControlName="search" type="search" />
+  </mat-form-field>
+  <mat-form-field subscriptSizing="dynamic">
+    <mat-label>Payment</mat-label>
+    <mat-select formControlName="paymentStatus">
+      <mat-option [value]="null">All</mat-option>
+      @for (status of statuses; track status.value) {
+        <mat-option [value]="status.value">{{ status.label }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+  <mat-form-field subscriptSizing="dynamic">
+    <mat-label>Customer</mat-label>
+    <mat-select formControlName="customerId">
+      <mat-option [value]="null">All customers</mat-option>
+      @for (customer of customers(); track customer.id) {
+        <mat-option [value]="customer.id">{{ customer.name }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+</form>
+
+@if (error(); as message) {
+  <p class="form-error" role="alert">{{ message }}</p>
+}
+
+<div class="table-panel">
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  <table mat-table class="responsive-table" [dataSource]="orders()">
+    <ng-container matColumnDef="order">
+      <th mat-header-cell *matHeaderCellDef>Order</th>
+      <td mat-cell *matCellDef="let order" data-label="">
+        <div class="cell-stack">
+          <a class="cell-link" [routerLink]="[order.id]">{{ number(order.id) }}</a>
+          <span class="muted">
+            {{ order.orderDate | date: 'mediumDate' : 'UTC' }} · {{ order.lineCount }}
+            {{ order.lineCount === 1 ? 'line' : 'lines' }}
+          </span>
+        </div>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="customer">
+      <th mat-header-cell *matHeaderCellDef>Customer</th>
+      <td mat-cell *matCellDef="let order" data-label="Customer">
+        @if (order.customerName) {
+          {{ order.customerName }}
+        } @else {
+          <span class="muted">Walk-in customer</span>
+        }
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="total">
+      <th mat-header-cell *matHeaderCellDef>Total incl. VAT</th>
+      <td mat-cell *matCellDef="let order" data-label="Total" class="amount">
+        {{ order.total | number: '1.3-3' }} {{ currency }}
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="payment">
+      <th mat-header-cell *matHeaderCellDef>Payment</th>
+      <td mat-cell *matCellDef="let order" data-label="Payment">
+        <span class="payment">
+          @if (canWrite()) {
+            <button
+              type="button"
+              class="status"
+              [class]="statusClass(order.paymentStatus)"
+              [attr.aria-label]="paymentLabel(order.paymentStatus) + '. Change payment for ' + number(order.id)"
+              (click)="editPayment(order)"
+            >
+              {{ paymentLabel(order.paymentStatus) }}
+            </button>
+          } @else {
+            <span class="status" [class]="statusClass(order.paymentStatus)">{{ paymentLabel(order.paymentStatus) }}</span>
+          }
+          @if (order.paymentStatus === 'PartiallyPaid') {
+            <span class="muted amount">{{ order.amountDue | number: '1.3-3' }} due</span>
+          }
+        </span>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef><span class="cdk-visually-hidden">Actions</span></th>
+      <td mat-cell *matCellDef="let order" class="actions-cell">
+        <button matIconButton [matMenuTriggerFor]="menu" [attr.aria-label]="'Actions for ' + number(order.id)">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+        <mat-menu #menu="matMenu" xPosition="before">
+          <a mat-menu-item [routerLink]="[order.id]">
+            <mat-icon>{{ canWrite() ? 'edit' : 'visibility' }}</mat-icon>
+            <span>{{ canWrite() ? 'Edit' : 'View' }}</span>
+          </a>
+          <a mat-menu-item [routerLink]="[order.id, 'print']" [queryParams]="{ print: true }">
+            <mat-icon>print</mat-icon>
+            <span>Print or save as PDF</span>
+          </a>
+          @if (canWrite()) {
+            <button mat-menu-item (click)="editPayment(order)">
+              <mat-icon>payments</mat-icon>
+              <span>Record payment</span>
+            </button>
+            <button mat-menu-item (click)="delete(order)">
+              <mat-icon>delete</mat-icon>
+              <span>Delete</span>
+            </button>
+          }
+        </mat-menu>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="columns"></tr>
+    <tr mat-row *matRowDef="let row; columns: columns"></tr>
+  </table>
+
+  @if (!loading() && orders().length === 0 && !error()) {
+    <p class="empty-state">No orders match these filters.</p>
+  }
+
+  <mat-paginator
+    [length]="total()"
+    [pageIndex]="page()"
+    [pageSize]="pageSize()"
+    [pageSizeOptions]="[10, 20, 50, 100]"
+    (page)="onPage($event)"
+    aria-label="Orders pages"
+  />
+</div>

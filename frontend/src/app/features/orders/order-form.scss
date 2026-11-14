@@ -1,0 +1,85 @@
+.option {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.3;
+  padding: 4px 0;
+}
+
+.lines {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.line {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(90px, 0.8fr) minmax(130px, 1fr) minmax(110px, 0.9fr) 40px;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+}
+
+.line-header {
+  padding-bottom: 4px;
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-label-medium);
+}
+
+.number {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.over {
+  color: #ffcf66;
+}
+
+.totals {
+  display: grid;
+  grid-template-columns: auto auto;
+  justify-content: end;
+  gap: 6px 24px;
+  margin: 16px 0 0;
+
+  dt {
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  dd {
+    margin: 0;
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .grand {
+    color: var(--mat-sys-on-surface);
+    font: var(--mat-sys-title-medium);
+  }
+}
+
+@media (max-width: 719.98px) {
+  .line-header {
+    display: none;
+  }
+
+  /* Article on its own row, then quantity and price side by side, then the total. */
+  .line {
+    grid-template-columns: 1fr 1fr 40px;
+    gap: 8px;
+  }
+
+  .article {
+    grid-column: 1 / 3;
+  }
+
+  .line > button,
+  .line > span:last-child {
+    grid-column: 3;
+    grid-row: 1;
+  }
+
+  .line-total {
+    grid-column: 1 / 3;
+  }
+}

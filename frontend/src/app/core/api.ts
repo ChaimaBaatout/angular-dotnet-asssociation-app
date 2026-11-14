@@ -2,11 +2,17 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import {
   Article,
+  ArticleOption,
   ArticleQuery,
   ArticleStats,
+  Company,
   Contact,
   ContactOption,
   ContactQuery,
+  Order,
+  OrderQuery,
+  OrderStats,
+  OrderSummary,
   PagedResult,
   PermissionInfo,
   Profile,
@@ -15,6 +21,8 @@ import {
   QrCodeStatus,
   SaveArticleRequest,
   SaveContactRequest,
+  SaveOrderRequest,
+  SavePaymentRequest,
   SaveProfileRequest,
   SaveUserRequest,
   User,
@@ -122,6 +130,11 @@ export class ArticlesApi {
     return this.http.get<string[]>('/api/articles/categories');
   }
 
+  /** Active articles to add to an order. Needs the orders edit permission rather than the articles one. */
+  options(search: string) {
+    return this.http.get<ArticleOption[]>('/api/articles/options', { params: { search } });
+  }
+
   stats() {
     return this.http.get<ArticleStats>('/api/articles/stats');
   }
@@ -159,6 +172,10 @@ export class ContactsApi {
     return this.http.get<ContactOption[]>('/api/suppliers/options');
   }
 
+  customerOptions() {
+    return this.http.get<ContactOption[]>('/api/customers/options');
+  }
+
   get(kind: string, id: number) {
     return this.http.get<Contact>(`/api/${kind}/${id}`);
   }
@@ -173,5 +190,47 @@ export class ContactsApi {
 
   delete(kind: string, id: number) {
     return this.http.delete<void>(`/api/${kind}/${id}`);
+  }
+}
+
+@Injectable({ providedIn: 'root' })
+export class OrdersApi {
+  private readonly http = inject(HttpClient);
+
+  list(query: OrderQuery) {
+    let params = new HttpParams().set('page', query.page).set('pageSize', query.pageSize);
+    if (query.search) params = params.set('search', query.search);
+    if (query.paymentStatus) params = params.set('paymentStatus', query.paymentStatus);
+    if (query.customerId != null) params = params.set('customerId', query.customerId);
+    return this.http.get<PagedResult<OrderSummary>>('/api/orders', { params });
+  }
+
+  stats() {
+    return this.http.get<OrderStats>('/api/orders/stats');
+  }
+
+  get(id: number) {
+    return this.http.get<Order>(`/api/orders/${id}`);
+  }
+
+  create(request: SaveOrderRequest) {
+    return this.http.post<Order>('/api/orders', request);
+  }
+
+  update(id: number, request: SaveOrderRequest) {
+    return this.http.put<Order>(`/api/orders/${id}`, request);
+  }
+
+  updatePayment(id: number, request: SavePaymentRequest) {
+    return this.http.put<Order>(`/api/orders/${id}/payment`, request);
+  }
+
+  delete(id: number) {
+    return this.http.delete<void>(`/api/orders/${id}`);
+  }
+
+  /** The seller's details printed on orders. */
+  company() {
+    return this.http.get<Company>('/api/company');
   }
 }

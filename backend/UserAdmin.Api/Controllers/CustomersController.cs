@@ -26,6 +26,13 @@ public class CustomersController(AppDbContext db) : ControllerBase
         return new PagedResult<ContactDto>(items, total, page, pageSize);
     }
 
+    /// <summary>Names only, so anyone who can view orders can see and choose their customer.</summary>
+    [HttpGet("options")]
+    [Authorize(Permissions.OrdersRead)]
+    public async Task<IReadOnlyList<ContactOptionDto>> Options() =>
+        await db.Customers.AsNoTracking().OrderBy(c => c.Name)
+            .Select(c => new ContactOptionDto(c.Id, c.Name)).ToListAsync();
+
     [HttpGet("{id:int}")]
     [Authorize(Permissions.CustomersRead)]
     public async Task<ActionResult<ContactDto>> Get(int id)
@@ -69,16 +76,21 @@ public class CustomersController(AppDbContext db) : ControllerBase
         var customer = await db.Customers.SingleOrDefaultAsync(c => c.Id == id);
         if (customer is null) return NotFound();
 
+        var orders = await db.Orders.CountAsync(o => o.CustomerId == id);
+        if (orders > 0)
+        {
+            return ConflictDetail(orders == 1
+                ? "1 order belongs to this customer. Deactivate the customer instead."
+                : $"{orders} orders belong to this customer. Deactivate the customer instead.");
+        }
+
         db.Customers.Remove(customer);
         await db.SaveChangesAsync();
         return NoContent();
     }
 
-    private ConflictObjectResult NameTaken() =>
-        Conflict(new ProblemDetails
-        {
-            Status = StatusCodes.Status409Conflict,
-            Title = "Conflict",
-            Detail = "A customer with this name already exists.",
-        });
+    private ConflictObjectResult ConflictDetail(string detail) =>
+        Conflict(new ProblemDetails { Status = StatusCodes.Status409Conflict, Title = "Conflict", Detail = detail });
+
+    private ConflictObjectResult NameTaken() => ConflictDetail("A customer with this name already exists.");
 }

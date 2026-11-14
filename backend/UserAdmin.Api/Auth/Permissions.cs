@@ -17,6 +17,8 @@ public static class Permissions
     public const string SuppliersWrite = "suppliers.write";
     public const string CustomersRead = "customers.read";
     public const string CustomersWrite = "customers.write";
+    public const string OrdersRead = "orders.read";
+    public const string OrdersWrite = "orders.write";
 
     public static readonly IReadOnlyList<PermissionInfo> Catalog =
     [
@@ -30,6 +32,8 @@ public static class Permissions
         new(SuppliersWrite, "Suppliers", "Create, edit and delete suppliers"),
         new(CustomersRead, "Customers", "View customers"),
         new(CustomersWrite, "Customers", "Create, edit and delete customers"),
+        new(OrdersRead, "Orders", "View and print orders"),
+        new(OrdersWrite, "Orders", "Create, edit and delete orders and record payments"),
     ];
 
     public static readonly IReadOnlySet<string> All = Catalog.Select(p => p.Code).ToHashSet();

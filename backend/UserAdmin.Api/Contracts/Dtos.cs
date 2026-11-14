@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using UserAdmin.Api.Domain;
 
 namespace UserAdmin.Api.Contracts;
 
@@ -157,3 +158,62 @@ public record SaveArticleRequest(
 
 /// <summary>Stock figures for active articles. Stock value is at purchase price.</summary>
 public record ArticleStatsDto(int Total, int LowStock, int OutOfStock, decimal StockValue);
+
+/// <summary>An active article to add to an order, with its stock on hand.</summary>
+public record ArticleOptionDto(int Id, string Reference, string Name, string? Brand, decimal SalePrice, int Quantity);
+
+/// <summary>The seller's details printed on orders, from the Company configuration section.</summary>
+public record CompanyDto(string Name, string? Address, string? Phone, string? Email, string? TaxNumber);
+
+public record OrderCustomerDto(int Id, string Name, string? Address, string? City, string? Phone, string? Email, string? TaxNumber);
+
+public record OrderLineDto(int Id, int ArticleId, string Reference, string Name, int Quantity, decimal UnitPrice, decimal LineTotal);
+
+public record OrderSummaryDto(
+    int Id,
+    DateOnly OrderDate,
+    int? CustomerId,
+    string? CustomerName,
+    int LineCount,
+    decimal Total,
+    PaymentStatus PaymentStatus,
+    decimal AmountPaid,
+    decimal AmountDue,
+    DateTimeOffset CreatedAt);
+
+public record OrderDto(
+    int Id,
+    DateOnly OrderDate,
+    OrderCustomerDto? Customer,
+    string? Notes,
+    IReadOnlyList<OrderLineDto> Lines,
+    decimal VatRate,
+    decimal Subtotal,
+    decimal VatAmount,
+    decimal Total,
+    PaymentStatus PaymentStatus,
+    decimal AmountPaid,
+    decimal AmountDue,
+    DateTimeOffset CreatedAt,
+    DateTimeOffset UpdatedAt);
+
+public record OrderLineRequest(
+    int ArticleId,
+    [Range(1, 1_000_000)] int Quantity,
+    [Range(typeof(decimal), "0", "1000000000")] decimal UnitPrice);
+
+/// <summary>AmountPaid is only read for a partial payment: Paid means the whole total, NotPaid means nothing.</summary>
+public record SaveOrderRequest(
+    DateOnly OrderDate,
+    int? CustomerId,
+    [StringLength(1000)] string? Notes,
+    [Required, MinLength(1, ErrorMessage = "Add at least one article.")] IReadOnlyList<OrderLineRequest> Lines,
+    PaymentStatus PaymentStatus,
+    [Range(typeof(decimal), "0", "1000000000000")] decimal AmountPaid);
+
+public record SavePaymentRequest(
+    PaymentStatus PaymentStatus,
+    [Range(typeof(decimal), "0", "1000000000000")] decimal AmountPaid);
+
+/// <summary>Orders not fully paid, and what is still owed on them.</summary>
+public record OrderStatsDto(int Outstanding, decimal AmountDue);

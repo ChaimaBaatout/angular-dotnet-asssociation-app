@@ -54,6 +54,7 @@ export class Shell {
       {
         title: 'Business',
         items: allowed([
+          { label: 'Orders', icon: 'receipt_long', link: '/orders', exact: false, permission: Permissions.ordersRead },
           { label: 'Articles', icon: 'inventory_2', link: '/articles', exact: false, permission: Permissions.articlesRead },
           { label: 'Suppliers', icon: 'local_shipping', link: '/suppliers', exact: false, permission: Permissions.suppliersRead },
           { label: 'Customers', icon: 'storefront', link: '/customers', exact: false, permission: Permissions.customersRead },
